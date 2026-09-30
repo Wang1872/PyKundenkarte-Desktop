@@ -1,0 +1,1 @@
+"""Lokale Datenlogik für PyKundenkarte."""
