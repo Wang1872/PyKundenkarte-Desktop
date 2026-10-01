@@ -1,0 +1,14 @@
+PyKundenkarte - Kurzstart unter Windows (ohne Administratorrechte)
+==============================================================
+
+1. Den ganzen Projektordner lokal ablegen; ein ZIP zuerst entpacken.
+2. Pruefen: data\DE.txt liegt im Projektordner. Optional zeichnet
+   data\bundeslaender.geojson die Bundeslaenderflaechen.
+3. start_windows.bat doppelklicken. Beim ersten Start wird .venv nur
+   fuer diesen Projektordner eingerichtet. Dafuer ist einmalig eine
+   erreichbare Python-Paketquelle noetig; spaeter startet die App offline.
+4. Im Fenster "CSV oeffnen ..." anklicken und Kundenname, Strasse,
+   PLZ und Ort den Spalten der eigenen CSV zuordnen.
+5. Suche und PLZ-Filter verwenden. Beispiel: Hessen && Sachsen oder
+   PLZ-Anfang 64 && 57; && bedeutet innerhalb eines Feldes ODER.
+   Beide Felder zusammen wirken als UND auf Karte und Liste.

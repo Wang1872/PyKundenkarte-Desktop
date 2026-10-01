@@ -42,14 +42,15 @@ def prepare(rows: list[dict], mapping: dict[str, str]) -> list[dict]:
         item["lon"] = None
         item["state"] = ""
         item["precision"] = ""
-        missing = [FIELDS[field][0] for field in ("name", "street", "postcode", "city") if not item[field]]
+        # Für die grobe PLZ-Position darf der Ortswert leer sein; die Spalte bleibt zuordenbar.
+        missing = [FIELDS[field][0] for field in ("name", "street", "postcode") if not item[field]]
         item["issue"] = "Fehlt: " + ", ".join(missing) if missing else ""
         result.append(item)
     return result
 
 
 def locate(customers: list[dict], postcodes) -> list[dict]:
-    """Ordnet nur eindeutig passende PLZ-/Ortsnamen einer lokalen Referenz zu."""
+    """Verortet deutsche Kunden nach PLZ; Ortsnamen verfeinern die Auswahl."""
     result = []
     for original in customers:
         item = original.copy()
@@ -62,15 +63,16 @@ def locate(customers: list[dict], postcodes) -> list[dict]:
         else:
             match = postcodes.resolve(item["postcode"], item["city"])
             if match is None:
-                item["issue"] = ("PLZ fehlt in der lokalen Ortsdatei" if
-                                 item["postcode"] not in postcodes.by_city else
-                                 "PLZ und Ort passen nicht eindeutig zusammen")
+                item["issue"] = "PLZ fehlt in der lokalen Ortsdatei"
             else:
-                point, state, matched_place = match
+                point, state, _matched_place, method = match
                 item["lat"], item["lon"] = point
                 item["state"] = state
-                item["precision"] = ("Ort/PLZ" if item["city"].casefold() == matched_place
-                                     else "Ort/PLZ · Namensvariante")
+                item["precision"] = {
+                    "ort": "PLZ-Referenz",
+                    "namensvariante": "PLZ-Referenz · Namensvariante",
+                    "plz": "PLZ-Referenz · Ort nicht abgeglichen",
+                }[method]
         result.append(item)
     return result
 

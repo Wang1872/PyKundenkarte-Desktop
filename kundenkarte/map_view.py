@@ -72,9 +72,10 @@ class CustomerMarker(QGraphicsEllipseItem):
         if len(customers) == 1:
             customer = customers[0]
             self.setToolTip(f"<b>{escape(customer['name'])}</b><br>"
-                            f"{escape(address(customer))}<br>Position auf PLZ-/Ortsebene")
+                            f"{escape(address(customer))}<br>"
+                            f"{escape(customer['precision'])} – ungefähre Position")
         else:
-            self.setToolTip(f"{len(customers)} Kunden an derselben PLZ-/Ortsposition – klicken, um einen auszuwählen")
+            self.setToolTip(f"{len(customers)} Kunden an derselben PLZ-Referenz – klicken, um einen auszuwählen")
 
     def paint(self, painter, option, widget=None):
         super().paint(painter, option, widget)
@@ -164,7 +165,7 @@ class MapView(QGraphicsView):
         item.setPos(x, y)
 
     def set_customers(self, customers: list[dict]):
-        """Zeigt nur Treffer mit eindeutiger lokaler Ortsreferenz."""
+        """Zeigt Kunden mit einer lokalen, ungefähren PLZ-Referenzposition."""
         self.map_scene.clear()
         self.markers = {}
         self.map_scene.setSceneRect(0, 0, self.WIDTH, self.HEIGHT)

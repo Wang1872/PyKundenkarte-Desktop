@@ -134,6 +134,8 @@ class AddCustomer(QDialog):
 
 
 class MainWindow(QMainWindow):
+    """Hauptfenster: CSV-Daten, lokale PLZ-Referenzen, Karte und Filter."""
+
     HEADERS = ["CSV-Zeile", "Kundenname", "Straße", "Hausnummer", "PLZ", "Ort", "Bundesland", "Land", "Position / Hinweis"]
 
     def __init__(self):
@@ -276,12 +278,14 @@ class MainWindow(QMainWindow):
 
     @staticmethod
     def _lookup_summary(lookup, invalid, ambiguous):
+        """Nur statistische Angaben anzeigen, niemals Orts- oder Kundendaten protokollieren."""
         count = len(lookup.by_city)
         return (f"Lokale Ortsdatei geladen: {count} PLZ; "
-                f"{invalid} ungültige Zeilen, {ambiguous} PLZ mit mehreren Ortszuordnungen. "
+                f"{invalid} ungültige Zeilen, {ambiguous} PLZ mit mehreren Ortsnamen. "
                 "Marker bezeichnen keine genauen Kundenadressen.")
 
     def open_customers(self):
+        """CSV lokal lesen und den Zuordnungsdialog für abweichende Spalten zeigen."""
         path, _ = QFileDialog.getOpenFileName(self, "Kunden-CSV öffnen", "", "CSV-Dateien (*.csv *.txt);;Alle Dateien (*)")
         if not path:
             return
@@ -311,6 +315,7 @@ class MainWindow(QMainWindow):
         self.refresh()
 
     def add_customer(self):
+        """Einen neuen Eintrag in die gerade geöffnete CSV schreiben."""
         if self.customer_file is None:
             warning(self, "Bitte zuerst eine Kunden-CSV öffnen.")
             return
@@ -329,6 +334,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Kunde in CSV gespeichert.", 5000)
 
     def open_postcodes(self):
+        """Die PLZ-Referenzen für diese Sitzung aus einer lokalen Datei ersetzen."""
         path, _ = QFileDialog.getOpenFileName(
             self, "Lokale GeoNames-Ortsdatei öffnen", "", "GeoNames-Dateien (DE.txt DE.zip *.txt *.zip);;Alle Dateien (*)")
         if not path:
@@ -362,6 +368,7 @@ class MainWindow(QMainWindow):
         table.setUpdatesEnabled(True)
 
     def refresh(self):
+        """Suche und PLZ-Filter gemeinsam auf Tabelle, Karte und Trefferzahl anwenden."""
         located = locate(self.customers, self.lookup)
         filtered = filter_customers(located, self.search.text(), self.postcode_filter.text())
         mapped = [c for c in filtered if not c["issue"] and c["lat"] is not None]
@@ -394,11 +401,13 @@ class MainWindow(QMainWindow):
         detail = QMessageBox(self)
         detail.setWindowTitle("Kunde")
         detail.setTextFormat(Qt.TextFormat.PlainText)
-        detail.setText(f"{customer['name']}\n{address(customer)}\n\nPosition auf Ortsebene, nicht an der Adresse.")
+        detail.setText(f"{customer['name']}\n{address(customer)}\n\n"
+                       f"{customer['precision']} – ungefähre PLZ-Position, nicht an der Adresse.")
         detail.exec()
 
 
 def main():
+    """Qt ohne Webserver starten; Fehlerdialoge enthalten keine Kundenadressen."""
     app = QApplication(sys.argv)
     app.setApplicationName("PyKundenkarte")
     app.setStyle("Fusion")
