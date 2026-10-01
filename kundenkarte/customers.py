@@ -60,15 +60,17 @@ def locate(customers: list[dict], postcodes) -> list[dict]:
         elif not getattr(postcodes, "by_city", None):
             item["issue"] = "Lokale Ortsdatei fehlt oder enthält keine passenden Daten"
         else:
-            point = postcodes.position_for(item["postcode"], item["city"])
-            if point is None:
+            match = postcodes.resolve(item["postcode"], item["city"])
+            if match is None:
                 item["issue"] = ("PLZ fehlt in der lokalen Ortsdatei" if
                                  item["postcode"] not in postcodes.by_city else
                                  "PLZ und Ort passen nicht eindeutig zusammen")
             else:
+                point, state, matched_place = match
                 item["lat"], item["lon"] = point
-                item["state"] = postcodes.state_for(item["postcode"], item["city"])
-                item["precision"] = "Ort/PLZ"
+                item["state"] = state
+                item["precision"] = ("Ort/PLZ" if item["city"].casefold() == matched_place
+                                     else "Ort/PLZ · Namensvariante")
         result.append(item)
     return result
 

@@ -4,6 +4,7 @@ import csv
 from collections import defaultdict
 from io import BytesIO, StringIO
 from math import isfinite
+import re
 from statistics import median
 from zipfile import BadZipFile, ZipFile
 
@@ -12,6 +13,18 @@ from .csv_io import CSVError
 
 def _name(text: str) -> str:
     return " ".join(text.casefold().split())
+
+
+def _place_words(text: str) -> tuple[str, ...]:
+    """Offizielle Ortszusätze und Schreibweisen für einen vorsichtigen Abgleich."""
+    text = _name(text)
+    for source, target in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        text = text.replace(source, target)
+    titles = {"lutherstadt", "hansestadt", "landeshauptstadt", "kreisstadt",
+              "universitaetsstadt", "stadt", "gemeinde", "ort", "stadtteil", "stadtbezirk", "stadtgemeinde", "stadtverband", "Flughafen"}
+    articles = {"am", "an", "der", "in", "im", "bei", "die", "das", "den"}
+    return tuple(word for word in re.findall(r"[a-z0-9]+", text)
+                 if word not in titles and word not in articles)
 
 
 def _number(text: str, lower: float, upper: float):
@@ -30,13 +43,38 @@ class PostcodeLookup(dict):
         self.by_city = by_city or {}
         self.state_by_city = state_by_city or {}
 
+    def resolve(self, postcode: str, city: str):
+        """Gibt (Position, Bundesland, Ortsname) nur bei eindeutigem PLZ-Abgleich zurück."""
+        places = self.by_city.get(postcode, {})
+        exact = _name(city)
+        if exact in places:
+            point = places[exact]
+            return (point, self.state_by_city.get(postcode, {}).get(exact, ""), exact) if point else None
+
+        sought = _place_words(city)
+        if not sought or not any(len(word) >= 4 for word in sought):
+            return None
+        sought_set = set(sought)
+        candidates = []
+        for place, point in places.items():
+            words = _place_words(place)
+            if (point is not None and words and words[0] == sought[0]
+                    and (sought_set <= set(words) or set(words) <= sought_set)):
+                candidates.append(place)
+        if len(candidates) != 1:
+            return None
+        place = candidates[0]
+        return places[place], self.state_by_city.get(postcode, {}).get(place, ""), place
+
     def position_for(self, postcode: str, city: str):
-        """Bei GeoNames muss der Ort zur PLZ passen; Mehrdeutigkeiten bleiben leer."""
-        return self.by_city.get(postcode, {}).get(_name(city))
+        """Kompatibler Positionszugriff, auch für eindeutige Namensvarianten."""
+        match = self.resolve(postcode, city)
+        return match[0] if match else None
 
     def state_for(self, postcode: str, city: str) -> str:
         """Bundesland nur bei eindeutig zugeordneter PLZ und Ortsangabe."""
-        return self.state_by_city.get(postcode, {}).get(_name(city), "")
+        match = self.resolve(postcode, city)
+        return match[1] if match else ""
 
 
 def _geonames_text(raw: bytes) -> str:

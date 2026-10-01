@@ -2586,7 +2586,7 @@ DE	60525	VDMA Verband Deutscher Maschinen- und Anlagenbau e.V.	Hessen	05	Regieru
 DE	60525	Techniker Krankenkasse	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.08	8.6265	
 DE	60544	Deutsche Post AG NL internationale Produktion BRIEF Frankfurt am Main	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0302	8.5683	
 DE	60546	Lufthansa Group Taste & More GmbH	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0302	8.5683	
-DE	60547	Flughafen Frankfurt Main AG	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0302	8.5683	
+DE	60547	Frankfurt am Main	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0302	8.5683	
 DE	60589	Mc Cann Erickson GmbH	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0986	8.6565	
 DE	60590	Universitätsklinikum Frankfurt	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.0964	8.6611	
 DE	60591	Deutsche Angestellten-Krankenkasse	Hessen	05	Regierungsbezirk Darmstadt	064	Frankfurt am Main	06412	50.1068	8.6873	
@@ -10196,7 +10196,7 @@ DE	85579	Neubiberg	Bayern	BY	Upper Bavaria	091	Landkreis München	09184	48.0771	
 DE	85586	Poing	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.17	11.8186	4
 DE	85591	Vaterstetten	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.1054	11.7682	4
 DE	85598	Baldham	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.1148	11.7959	4
-DE	85599	Parsdorf	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.1422	11.788	4
+DE	85599	Vaterstetten	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.1422	11.788	4
 DE	85604	Zorneding	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.0843	11.8245	4
 DE	85609	Aschheim	Bayern	BY	Upper Bavaria	091	Landkreis München	09184	48.1711	11.7167	4
 DE	85614	Kirchseeon	Bayern	BY	Upper Bavaria	091	Landkreis Ebersberg	09175	48.0714	11.8888	4
@@ -11993,7 +11993,7 @@ DE	36381	Schlüchtern	Hessen	HE	Regierungsbezirk Darmstadt	064	Main-Kinzig-Kreis
 DE	36391	Sinntal	Hessen	HE	Regierungsbezirk Darmstadt	064	Main-Kinzig-Kreis	06435	50.3127	9.6234	4
 DE	36396	Steinau an der Straße	Hessen	HE	Regierungsbezirk Darmstadt	064	Main-Kinzig-Kreis	06435	50.314	9.4633	4
 DE	55246	Mainz-Kostheim	Hessen	HE	Regierungsbezirk Darmstadt	064	Wiesbaden, Landeshauptstadt	06414	50.0051	8.3134	4
-DE	55252	Mainz-Kastel	Hessen	HE	Regierungsbezirk Darmstadt	064	Wiesbaden, Landeshauptstadt	06414	50.0102	8.2844	4
+DE	55252	Wiesbaden	Hessen	HE	Regierungsbezirk Darmstadt	064	Wiesbaden, Landeshauptstadt	06414	50.0102	8.2844	4
 DE	60306	Frankfurt am Main	Hessen	HE	Regierungsbezirk Darmstadt	064	Frankfurt am Main, Stadt	06412	50.1159	8.6702	6
 DE	60308	Frankfurt am Main	Hessen	HE	Regierungsbezirk Darmstadt	064	Frankfurt am Main, Stadt	06412	50.1125	8.6529	6
 DE	60310	Frankfurt am Main	Hessen	HE	Regierungsbezirk Darmstadt	064	Frankfurt am Main, Stadt	06412	50.1107	8.673	6
@@ -14929,7 +14929,7 @@ DE	29643	Neuenkirchen	Niedersachsen	NI		00	Landkreis Heidekreis	03358	53.0326	9.
 DE	29646	Bispingen	Niedersachsen	NI		00	Landkreis Heidekreis	03358	53.0831	9.9977	4
 DE	29649	Wietzendorf	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.9167	9.9833	4
 DE	29664	Walsrode	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.8615	9.5926	4
-DE	29683	Fallingbostel	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.8497	9.688	4
+DE	29683	Bad Fallingbostel	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.8497	9.688	4
 DE	29690	Grethem	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.7271	9.5725	4
 DE	29690	Schwarmstedt	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.6779	9.6177	4
 DE	29690	Essel	Niedersachsen	NI		00	Landkreis Heidekreis	03358	52.6913	9.6414	4
@@ -19137,7 +19137,7 @@ DE	23758	Gremersdorf	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.3333	1
 DE	23758	Oldenburg in Holstein	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.2958	10.9016	4
 DE	23758	Wangels	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.2667	10.7667	4
 DE	23758	Göhl	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.2833	10.95	
-DE	23769	Fehmarn	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.4378	11.1935	4
+DE	23769	Burg/Fehmarn	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.4378	11.1935	4
 DE	23774	Heiligenhafen	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.3696	10.9802	4
 DE	23775	Großenbrode	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.3833	11.0833	4
 DE	23777	Heringsdorf	Schleswig-Holstein	SH		00	Kreis Ostholstein	01055	54.301	11.0066	4
