@@ -6,7 +6,7 @@ import json
 from math import cos
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QRectF
+from PySide6.QtCore import Qt, QRectF, QTimer
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPainterPath, QPen, QTransform
 from PySide6.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsScene, QGraphicsView, QMenu
 
@@ -23,7 +23,7 @@ MAJOR_CITIES = (
     ("Dresden", 51.0504, 13.7373),
     ("Frankfurt", 50.1109, 8.6821),
     ("Stuttgart", 48.7758, 9.1829),
-    ("München", 48.1351, 11.5820),
+    ("München", 48.1351, 11.5820)
 )
 
 
@@ -88,18 +88,36 @@ class CustomerMarker(QGraphicsEllipseItem):
             painter.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, str(len(self.customers)))
 
     def mousePressEvent(self, event):
-        if len(self.customers) == 1:
-            self.callback(self.customers[0])
-        else:
-            menu = QMenu()
-            for customer in self.customers:
-                action = menu.addAction(f"{customer['name']} — {address(customer)}")
-                action.setData(customer["row"])
-            chosen = menu.exec(event.screenPos())
-            if chosen is not None:
-                customer = next(c for c in self.customers if c["row"] == chosen.data())
-                self.callback(customer)
+        if event.button() != Qt.MouseButton.LeftButton:
+            event.ignore()
+            return
         event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() != Qt.MouseButton.LeftButton:
+            event.ignore()
+            return
+        if self.contains(event.pos()):
+            # Erst nach dem Loslassen öffnen: QMenu.exec während mousePressEvent
+            # lässt sonst den Marker als Maus-Empfänger für spätere Klicks aktiv.
+            if len(self.customers) == 1:
+                customer = self.customers[0]
+                QTimer.singleShot(0, lambda: self.callback(customer))
+            else:
+                position = event.screenPos()
+                QTimer.singleShot(0, lambda: self._choose_customer(position))
+        event.accept()
+
+    def _choose_customer(self, position):
+        """Das Sammelmenü nach Abschluss des Mausklicks anzeigen."""
+        menu = QMenu()
+        for customer in self.customers:
+            action = menu.addAction(f"{customer['name']} — {address(customer)}")
+            action.setData(customer["row"])
+        chosen = menu.exec(position)
+        if chosen is not None:
+            customer = next(c for c in self.customers if c["row"] == chosen.data())
+            self.callback(customer)
 
 
 class MapView(QGraphicsView):
@@ -212,6 +230,15 @@ class MapView(QGraphicsView):
                        "Dresden": (10, 2), "Frankfurt": (-78, 0)}
             self._label(city, x, y, offsets.get(city, (8, -24)), "#405d50")
 
+        #rodgau
+        x,y =xy(8.8844,50.0255)
+        dot = self.map_scene.addEllipse(
+                -2.5, -2.5, 5, 5, QPen(QColor("#923030")), QBrush(QColor("#923030")))
+        dot.setPos(x, y)
+        dot.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
+        dot.setZValue(-1)
+        self._label("Rodgau", x, y, (8, -24), "#923030")
+
         positions = defaultdict(list)
         for customer in valid:
             positions[(customer["lat"], customer["lon"])].append(customer)
@@ -224,7 +251,16 @@ class MapView(QGraphicsView):
             for customer in customers_here:
                 self.markers[customer["row"]] = marker
 
-    def highlight(self, csv_row: int):
+    def highlight(self, csv_row: int, focus: bool = False):
+        """Markiert den Kunden sichtbar und führt die Karte bei Bedarf dorthin."""
+        target = self.markers.get(csv_row)
         for marker in set(self.markers.values()):
-            selected = any(customer["row"] == csv_row for customer in marker.customers)
+            selected = marker is target
             marker.setPen(QPen(QColor("#111827" if selected else "white"), 3 if selected else 2))
+            marker.setBrush(QBrush(QColor("#f97316" if selected else "#2563eb")))
+            marker.setScale(1.35 if selected else 1.0)
+            marker.setZValue(5 if selected else 3)
+        if focus and target is not None:
+            if self.zoom_level < 2.0:
+                self.zoom(2.0 / self.zoom_level)
+            self.centerOn(target)

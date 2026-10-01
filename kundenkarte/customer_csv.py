@@ -42,6 +42,9 @@ class CustomerFile:
         for field in ("name", "street", "postcode", "city"):
             value = fields[field].strip()
             values[self.mapping[field]] = normalize_postcode(value) if field == "postcode" else value
+        for field in ("email", "phone"):
+            if self.mapping.get(field, "—") != "—":
+                values[self.mapping[field]] = fields.get(field, "").strip()
         # Hausnummer und Land bleiben in einer vorhandenen CSV-Spalte leer.
         newline = "\r\n" if b"\r\n" in current else "\n" if b"\n" in current else "\r" if b"\r" in current else "\r\n"
         buffer = io.StringIO(newline="")

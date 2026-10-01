@@ -318,7 +318,7 @@ DE	73726	Finanzamt Esslingen	Baden-Württemberg	01	Regierungsbezirk Stuttgart	08
 DE	73726	Hengstenberg GmbH & Co.KG	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Landkreis Esslingen	08116	48.7423	9.2928	
 DE	73726	Index-Werke GmbH & Co. KG Hahn & Tessky	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Landkreis Esslingen	08116	48.7359	9.32	
 DE	73726	Klinikum Esslingen GmbH	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Landkreis Esslingen	08116	48.7371	9.3271	
-DE	73726	Kreissparkasse Esslingen-Nürtingen	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Landkreis Esslingen	08116	48.7394	9.3025	
+DE	73705	Esslingen-Nürtingen	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Landkreis Esslingen	08116	48.7394	9.3025	
 DE	74064	Kreissparkasse Heilbronn	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Stadtkreis Heilbronn	08121	49.1387	9.2214	
 DE	74064	Stadt Heilbronn	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Stadtkreis Heilbronn	08121	49.1404	9.2232	
 DE	74064	Media-Markt TV-Hifi-Elektro GmbH Heilbronn	Baden-Württemberg	01	Regierungsbezirk Stuttgart	081	Stadtkreis Heilbronn	08121	49.1491	9.2133	
@@ -694,6 +694,7 @@ DE	76247	Regierungspräsidium Abt.7 Schule u. Bildung	Baden-Württemberg	01	Karl
 DE	76248	Deutsche Post AG Niederlassung BRIEF Karlsruhe	Baden-Württemberg	01	Karlsruhe Region	082	Stadtkreis Karlsruhe	08212	49.0012	8.3594	
 DE	76249	Deutsche Post AG Nachsendezentrum Karlsruhe	Baden-Württemberg	01	Karlsruhe Region	082	Stadtkreis Karlsruhe	08212	49.0012	8.3594	
 DE	76253	Deutsche Post AG Rücksendezentrum Karlsruhe	Baden-Württemberg	01	Karlsruhe Region	082	Stadtkreis Karlsruhe	08212	49.0012	8.3594	
+DE	76254	Karlsruhe	Baden-Württemberg	01	Karlsruhe Region	082	Stadtkreis Karlsruhe	08212	49.0012	8.3594	
 DE	76273	Flowserve Flow Control GmbH	Baden-Württemberg	01	Karlsruhe Region	082	Landkreis Karlsruhe	08215	48.9399	8.3666	
 DE	76273	Pharm Allergan GmbH	Baden-Württemberg	01	Karlsruhe Region	082	Landkreis Karlsruhe	08215	48.94	8.3689	
 DE	76273	CCI Kosmetik Versand e.K.	Baden-Württemberg	01	Karlsruhe Region	082	Stadtkreis Karlsruhe	08212	48.9966	8.4774	
@@ -884,6 +885,7 @@ DE	79821	Agentur für Arbeit Titisee-Neustadt	Baden-Württemberg	01	Freiburg Reg
 DE	79821	Finanzamt Freiburg - Land	Baden-Württemberg	01	Freiburg Region	083	Landkreis Breisgau-Hochschwarzwald	08315	47.9153	8.2121	
 DE	79821	Papierfabrik Neustadt GmbH	Baden-Württemberg	01	Freiburg Region	083	Landkreis Breisgau-Hochschwarzwald	08315	47.9059	8.226	
 DE	72105	TeamBank AG	Baden-Württemberg	01	Tübingen Region	084	Landkreis Tübingen	08416	48.4728	8.9468	
+DE	72109	Mössingen	Baden-Württemberg	01	Tübingen Region	084	Landkreis Tübingen	08416	48.40716 	9.05630	
 DE	72332	Agentur für Arbeit Balingen	Baden-Württemberg	01	Tübingen Region	084	Zollernalbkreis	08417	48.2723	8.8545	
 DE	72334	EBA Maschinenfabrik Adolf Ehinger GmbH	Baden-Württemberg	01	Tübingen Region	084	Zollernalbkreis	08417	48.2659	8.8496	
 DE	72334	Finanzamt Balingen	Baden-Württemberg	01	Tübingen Region	084	Zollernalbkreis	08417	48.2682	8.8494	
@@ -2649,7 +2651,7 @@ DE	61229	Deutsche Rentenversicherung Bund Reha-Klinik Wetterau	Hessen	05	Regieru
 DE	61229	Kaiserberg-Klinik Pitzer KG	Hessen	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	50.3714	8.7362	
 DE	61229	Deutsche Rentenversicherung Bund Rehazentrum Bad Nauheim	Hessen	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	50.3651	8.745	
 DE	61229	Diakoniewerk Elisabethhaus Bad Nauheim	Hessen	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	50.3609	8.7438	
-DE	61229	Klinik am Südpark Pitzer KG	Hessen	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	50.3606	8.7437	
+DE	66273	Sulzbach/Saar	Saarland	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	49.3022	7.0622	
 DE	61229	Gesundheitszentrum Wetterau gGmbH Rechnungswesen GZW-West	Hessen	05	Regierungsbezirk Darmstadt	064	Wetteraukreis	06440	50.3568	8.7298	
 DE	61300	Bundesverwaltungsamt	Hessen	05	Regierungsbezirk Darmstadt	064	Hochtaunuskreis	06434	50.2387	8.5884	
 DE	61341	Start Amadeus GmbH	Hessen	05	Regierungsbezirk Darmstadt	064	Hochtaunuskreis	06434	50.2188	8.6167	
@@ -6334,6 +6336,8 @@ DE	39092	IKK gesund plus	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.
 DE	39093	Industrie- und Handelskammer	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1318	11.6391	
 DE	39094	Landtag von Sachsen-Anhalt	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1262	11.6342	
 DE	39097	Medizinische Fakultät der Otto-von-Guericke-Universität	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1012	11.62	
+DE	39007	Medizinische Fakultät der Otto-von-Guericke-Universität	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1012	11.62
+DE	39006	Medizinische Fakultät der Otto-von-Guericke-Universität	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1012	11.62
 DE	39098	Stadtsparkasse Magdeburg	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1518	11.6385	
 DE	39099	Otto-von-Guericke-Universität	Saxony-Anhalt	14			Landeshauptstadt Magdeburg	15003	52.1391	11.6413	
 DE	39148	Deutsche Post AG Rücksendezentrum Magdeburg	Saxony-Anhalt	14			Börde	15083	52.0519	11.5935	
@@ -10810,6 +10814,7 @@ DE	91090	Effeltrich	Bayern	BY	Upper Franconia	094	Landkreis Forchheim	09474	49.6
 DE	91094	Langensendelbach	Bayern	BY	Upper Franconia	094	Landkreis Forchheim	09474	49.6405	11.071	4
 DE	91099	Poxdorf	Bayern	BY	Upper Franconia	094	Landkreis Forchheim	09474	49.6634	11.0708	4
 DE	91257	Pegnitz	Bayern	BY	Upper Franconia	094	Landkreis Bayreuth	09472	49.7522	11.5419	4
+DE	91253	Pegnitz	Bayern	BY	Upper Franconia	094	Landkreis Bayreuth	09472	49.7522	11.5419	4
 DE	91278	Pottenstein	Bayern	BY	Upper Franconia	094	Landkreis Bayreuth	09472	49.7713	11.4078	4
 DE	91282	Betzenstein	Bayern	BY	Upper Franconia	094	Landkreis Bayreuth	09472	49.6817	11.4177	4
 DE	91286	Obertrubach	Bayern	BY	Upper Franconia	094	Landkreis Forchheim	09474	49.7	11.35	4
@@ -14621,6 +14626,7 @@ DE	28790	Schwanewede	Niedersachsen	NI		00	Landkreis Osterholz	03356	53.2321	8.54
 DE	28816	Stuhr	Niedersachsen	NI		00	Landkreis Diepholz	03251	53.0333	8.75	4
 DE	28832	Achim	Niedersachsen	NI		00	Landkreis Verden	03361	53.0142	9.0263	4
 DE	28844	Weyhe	Niedersachsen	NI		00	Landkreis Diepholz	03251	52.989	8.8314	4
+DE	28835	Weyhe	Niedersachsen	NI		00	Landkreis Diepholz	03251	52.989	8.8314	4
 DE	28857	Syke	Niedersachsen	NI		00	Landkreis Diepholz	03251	52.9135	8.8221	4
 DE	28865	Lilienthal	Niedersachsen	NI		00	Landkreis Osterholz	03356	53.1419	8.9034	4
 DE	28870	Ottersberg	Niedersachsen	NI		00	Landkreis Verden	03361	53.1292	9.1068	4

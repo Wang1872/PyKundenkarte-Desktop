@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
 
 from kundenkarte.csv_io import CSVError, read_csv
 from kundenkarte.customer_csv import CustomerFile, SaveError
-from kundenkarte.customers import FIELDS, address, filter_customers, locate, prepare, suggest
+from kundenkarte.customers import FIELDS, address, contact_lines, filter_customers, locate, prepare, suggest
 from kundenkarte.map_view import MapView
 from kundenkarte.postcodes import load_postcodes
 
@@ -105,7 +105,7 @@ class ColumnMapping(QDialog):
 class AddCustomer(QDialog):
     """Hausnummer wird für neue Einträge bewusst nicht abgefragt."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, mapping):
         super().__init__(parent)
         self.setWindowTitle("Kunde hinzufügen")
         self.setMinimumWidth(380)
@@ -116,6 +116,11 @@ class AddCustomer(QDialog):
             edit = QLineEdit()
             layout.addRow(label + " *", edit)
             self.inputs[field] = edit
+        for field, label in (("email", "E-Mail"), ("phone", "Telefon")):
+            if mapping.get(field, "—") != "—":
+                edit = QLineEdit()
+                layout.addRow(label + " (optional)", edit)
+                self.inputs[field] = edit
         self.inputs["name"].setFocus()
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Save | QDialogButtonBox.StandardButton.Cancel)
         buttons.button(QDialogButtonBox.StandardButton.Save).setText("In CSV speichern")
@@ -127,7 +132,7 @@ class AddCustomer(QDialog):
         return {field: edit.text().strip() for field, edit in self.inputs.items()}
 
     def _validate(self):
-        if any(not value for value in self.values().values()):
+        if any(not self.inputs[field].text().strip() for field in ("name", "street", "postcode", "city")):
             warning(self, "Bitte alle vier Felder ausfüllen.")
         else:
             self.accept()
@@ -136,7 +141,7 @@ class AddCustomer(QDialog):
 class MainWindow(QMainWindow):
     """Hauptfenster: CSV-Daten, lokale PLZ-Referenzen, Karte und Filter."""
 
-    HEADERS = ["CSV-Zeile", "Kundenname", "Straße", "Hausnummer", "PLZ", "Ort", "Bundesland", "Land", "Position / Hinweis"]
+    HEADERS = ["CSV-Zeile", "Kundenname", "Straße", "Hausnummer", "PLZ", "Ort", "Bundesland", "Land", "E-Mail", "Telefon", "Position / Hinweis"]
 
     def __init__(self):
         super().__init__()
@@ -178,8 +183,8 @@ class MainWindow(QMainWindow):
         self.search.setPlaceholderText("Name, Straße, PLZ, Ort oder Bundesland")
         self.search.setToolTip("Mehrere Suchbegriffe mit && als ODER verbinden, z. B. Hessen && Baden-Württemberg.")
         self.postcode_filter = QLineEdit()
-        self.postcode_filter.setPlaceholderText("z. B. 64 && 57")
-        self.postcode_filter.setToolTip("Mehrere PLZ-Anfänge mit && als ODER verbinden.")
+        self.postcode_filter.setPlaceholderText("z. B. 60 -- 69 oder 01 && 09")
+        self.postcode_filter.setToolTip("PLZ-Anfang oder Bereich: 01 -- 09. Beide Grenzen gleich lang; && verbindet mit ODER.")
         filters.addWidget(QLabel("Suche:"))
         filters.addWidget(self.search, 3)
         filters.addWidget(QLabel("PLZ beginnt mit:"))
@@ -219,7 +224,8 @@ class MainWindow(QMainWindow):
         layout.addWidget(splitter)
         self.search.textChanged.connect(self.refresh)
         self.postcode_filter.textChanged.connect(self.refresh)
-        self.table.cellClicked.connect(self.select_table_row)
+        self.table.itemSelectionChanged.connect(
+            lambda: self.select_table_row(self.table.currentRow(), 0))
         self._load_default_lookup()
         self.refresh()
         self.setStyleSheet("""
@@ -254,7 +260,7 @@ class MainWindow(QMainWindow):
         table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         table.setAlternatingRowColors(True)
         table.verticalHeader().hide()
-        for column, width in enumerate((72, 190, 180, 96, 70, 145, 145, 80, 230)):
+        for column, width in enumerate((72, 190, 180, 96, 70, 145, 145, 80, 220, 140, 230)):
             table.setColumnWidth(column, width)
         table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         table.horizontalHeader().setStretchLastSection(True)
@@ -319,7 +325,7 @@ class MainWindow(QMainWindow):
         if self.customer_file is None:
             warning(self, "Bitte zuerst eine Kunden-CSV öffnen.")
             return
-        dialog = AddCustomer(self)
+        dialog = AddCustomer(self, self.customer_file.mapping)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
         try:
@@ -360,6 +366,7 @@ class MainWindow(QMainWindow):
         for row, customer in enumerate(customers):
             values = [str(customer["row"]), customer["name"], customer["street"], customer["number"],
                       customer["postcode"], customer["city"], customer["state"], customer["country"],
+                      customer["email"], customer["phone"],
                       customer["issue"] or customer["precision"]]
             for col, value in enumerate(values):
                 cell = QTableWidgetItem(value)
@@ -389,7 +396,7 @@ class MainWindow(QMainWindow):
     def select_table_row(self, row, _column):
         cell = self.table.item(row, 0)
         if cell is not None:
-            self.map.highlight(cell.data(Qt.ItemDataRole.UserRole))
+            self.map.highlight(cell.data(Qt.ItemDataRole.UserRole), focus=True)
 
     def select_customer(self, customer):
         row = self.row_index.get(customer["row"])
@@ -401,8 +408,9 @@ class MainWindow(QMainWindow):
         detail = QMessageBox(self)
         detail.setWindowTitle("Kunde")
         detail.setTextFormat(Qt.TextFormat.PlainText)
-        detail.setText(f"{customer['name']}\n{address(customer)}\n\n"
-                       f"{customer['precision']} – ungefähre PLZ-Position, nicht an der Adresse.")
+        detail.setText("\n".join([customer["name"], address(customer),
+                                  *contact_lines(customer), "",
+                                  f"{customer['precision']} – ungefähre PLZ-Position"]))
         detail.exec()
 
 

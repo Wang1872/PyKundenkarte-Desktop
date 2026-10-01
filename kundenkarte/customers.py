@@ -1,5 +1,10 @@
 """Kunden validieren, nur über lokale PLZ-/Ortsdaten verorten und filtern."""
 
+import re
+
+
+POSTCODE_RANGE = re.compile(r"([0-9]{1,5})\s*--\s*([0-9]{1,5})")
+
 
 FIELDS = {
     "name": ("Kundenname", True, ("kundenname", "kunde", "name", "firma", "customer")),
@@ -8,6 +13,8 @@ FIELDS = {
     "postcode": ("Postleitzahl", True, ("postleitzahl", "plz", "zip", "postal code")),
     "city": ("Ort", True, ("ort", "stadt", "city")),
     "country": ("Land", False, ("land", "country")),
+    "email": ("E-Mail", False, ("e-mail", "email", "e-mail-adresse", "emailadresse", "mail")),
+    "phone": ("Telefon", False, ("telefon", "telefonnummer", "tel", "tel.", "phone", "mobil", "handy")),
 }
 
 
@@ -32,10 +39,17 @@ def address(item: dict) -> str:
     ) if part)
 
 
+def contact_lines(item: dict) -> list[str]:
+    """Nur vorhandene Kontaktdaten für Marker-Details aufbereiten."""
+    return ([f"E-Mail: {item['email']}"] if item.get("email") else []) + (
+        [f"Telefon: {item['phone']}"] if item.get("phone") else [])
+
+
 def prepare(rows: list[dict], mapping: dict[str, str]) -> list[dict]:
     result = []
     for row_no, source in enumerate(rows, start=2):
-        item = {field: source[column].strip() if column != "—" else "" for field, column in mapping.items()}
+        item = {field: source[mapping[field]].strip() if mapping.get(field, "—") != "—" else ""
+                for field in FIELDS}
         item["postcode"] = normalize_postcode(item["postcode"], item["country"])
         item["row"] = row_no
         item["lat"] = None  # Interne Kartenposition; nie aus der Kunden-CSV.
@@ -86,13 +100,26 @@ def _search_text(value: str) -> str:
     return value
 
 
+def _matches_postcode(postcode: str, expression: str) -> bool:
+    """Präfix oder inklusiven Bereich gleich langer PLZ-Anfänge prüfen."""
+    match = POSTCODE_RANGE.fullmatch(expression)
+    if match:
+        first, last = match.groups()
+        return (len(first) == len(last) and len(postcode) >= len(first)
+                and first <= postcode[:len(first)] <= last)
+    if "--" in expression:
+        return False
+    return postcode.startswith(expression)
+
+
 def filter_customers(customers: list[dict], query: str, prefix: str) -> list[dict]:
-    """&& ist ODER innerhalb eines Feldes; beide Felder zusammen sind UND."""
+    """PLZ-Präfixe/Bereiche und Suche kombinieren; && bedeutet jeweils ODER."""
     alternatives = [_search_text(part).split() for part in query.split("&&") if part.strip()]
-    prefixes = [part.strip() for part in prefix.split("&&") if part.strip()]
+    postcode_expressions = [part.strip() for part in prefix.split("&&") if part.strip()]
     result = []
     for item in customers:
-        if prefixes and not any(item["postcode"].startswith(part) for part in prefixes):
+        if postcode_expressions and not any(_matches_postcode(item["postcode"], part)
+                                            for part in postcode_expressions):
             continue
         searchable = _search_text(" ".join(item[field] for field in
                                     ("name", "street", "postcode", "city", "state")))
