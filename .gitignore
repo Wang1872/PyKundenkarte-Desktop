@@ -25,5 +25,7 @@ __pycache__/
 !.env.example
 
 
-build/
+build_windows/
 dist/
+
+release/

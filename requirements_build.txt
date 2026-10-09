@@ -1,0 +1,2 @@
+# Nur auf dem Windows-Rechner zum Erstellen des weiterzugebenden Pakets.
+pyinstaller==6.22.3

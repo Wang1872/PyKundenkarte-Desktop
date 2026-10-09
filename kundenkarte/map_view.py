@@ -3,14 +3,15 @@
 from collections import defaultdict
 from html import escape
 import json
-from math import cos
+from math import cos, isfinite
 from pathlib import Path
 
-from PySide6.QtCore import Qt, QRectF, QTimer
+from PySide6.QtCore import Qt, QRectF, QTimer, Signal
 from PySide6.QtGui import QBrush, QColor, QFont, QPainter, QPainterPath, QPen, QTransform
 from PySide6.QtWidgets import QGraphicsEllipseItem, QGraphicsItem, QGraphicsScene, QGraphicsView, QMenu
 
-from .customers import address
+from .customers import address, contact_lines
+from .paths import project_dir
 
 # Diese Beschriftungen sind Kartenorientierung und enthalten keine Kundendaten.
 MAJOR_CITIES = (
@@ -23,7 +24,7 @@ MAJOR_CITIES = (
     ("Dresden", 51.0504, 13.7373),
     ("Frankfurt", 50.1109, 8.6821),
     ("Stuttgart", 48.7758, 9.1829),
-    ("München", 48.1351, 11.5820)
+    ("München", 48.1351, 11.5820),
 )
 
 
@@ -71,8 +72,9 @@ class CustomerMarker(QGraphicsEllipseItem):
         self.setZValue(3)
         if len(customers) == 1:
             customer = customers[0]
+            contact = "".join(f"{escape(line)}<br>" for line in contact_lines(customer))
             self.setToolTip(f"<b>{escape(customer['name'])}</b><br>"
-                            f"{escape(address(customer))}<br>"
+                            f"{escape(address(customer))}<br>{contact}"
                             f"{escape(customer['precision'])} – ungefähre Position")
         else:
             self.setToolTip(f"{len(customers)} Kunden an derselben PLZ-Referenz – klicken, um einen auszuwählen")
@@ -121,6 +123,8 @@ class CustomerMarker(QGraphicsEllipseItem):
 
 
 class MapView(QGraphicsView):
+    drawingsChanged = Signal()
+    viewChanged = Signal()
     WIDTH = 960
     HEIGHT = 740
     LEFT = 60
@@ -140,8 +144,13 @@ class MapView(QGraphicsView):
         self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
         self.setBackgroundBrush(QColor("#f7fafc"))
         self.markers = {}
+        self.draw_mode = "move"
+        self.drawings = []
+        self.stroke_items = []
+        self._current_points = None
+        self._current_item = None
         self.state_boundaries = load_state_boundaries(
-            Path(__file__).resolve().parent.parent / "data" / "bundeslaender.geojson")
+            project_dir() / "data" / "bundeslaender.geojson")
         self.zoom_level = 1.0
         self.set_customers([])
 
@@ -156,6 +165,112 @@ class MapView(QGraphicsView):
             self.zoom(1.2 ** (delta / 120), under_mouse=True)
         event.accept()
 
+    def set_draw_mode(self, mode: str):
+        """Zwischen Verschieben, Zeichnen und Radieren wechseln."""
+        if mode not in ("move", "draw", "erase"):
+            return
+        self.draw_mode = mode
+        self.setDragMode(QGraphicsView.DragMode.ScrollHandDrag if mode == "move"
+                         else QGraphicsView.DragMode.NoDrag)
+        self.viewport().setCursor(Qt.CursorShape.CrossCursor if mode != "move"
+                                  else Qt.CursorShape.ArrowCursor)
+
+    def _map_point(self, position):
+        point = self.mapToScene(position)
+        area = QRectF(self.LEFT, self.TOP, self.RIGHT - self.LEFT, self.BOTTOM - self.TOP)
+        return point if area.contains(point) else None
+
+    def _draw_item(self, points):
+        path = QPainterPath()
+        path.moveTo(*points[0])
+        for point in points[1:]:
+            path.lineTo(*point)
+        if len(points) == 1:
+            path.lineTo(points[0][0] + 0.1, points[0][1])
+        pen = QPen(QColor("#b94f61"), 3, Qt.PenStyle.SolidLine,
+                   Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin)
+        pen.setCosmetic(True)
+        item = self.map_scene.addPath(path, pen)
+        item.setZValue(8)
+        return item
+
+    def set_drawings(self, strokes):
+        """Gespeicherte Linien nach jedem Neuzeichnen der Karte wiederherstellen."""
+        for item in self.stroke_items:
+            self.map_scene.removeItem(item)
+        self.stroke_items = []
+        self.drawings = []
+        if not isinstance(strokes, list):
+            return
+        for stroke in strokes[:250]:
+            if not isinstance(stroke, list) or not 1 <= len(stroke) <= 1200:
+                continue
+            if not all(isinstance(p, (list, tuple)) and len(p) == 2
+                       and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                               and isfinite(v) for v in p)
+                       and 0 <= p[0] <= self.WIDTH and 0 <= p[1] <= self.HEIGHT
+                       for p in stroke):
+                continue
+            points = [[float(x), float(y)] for x, y in stroke]
+            self.drawings.append(points)
+            self.stroke_items.append(self._draw_item(points))
+
+    def remove_last_drawing(self):
+        if self.drawings:
+            self.drawings.pop()
+            self.map_scene.removeItem(self.stroke_items.pop())
+            self.drawingsChanged.emit()
+
+    def clear_drawings(self):
+        if self.drawings:
+            self.set_drawings([])
+            self.drawingsChanged.emit()
+
+    def mousePressEvent(self, event):
+        if self.draw_mode == "move" or event.button() != Qt.MouseButton.LeftButton:
+            super().mousePressEvent(event)
+            return
+        if self.draw_mode == "erase":
+            item = next((item for item in self.items(event.pos()) if item in self.stroke_items), None)
+            if item is not None:
+                index = self.stroke_items.index(item)
+                self.map_scene.removeItem(self.stroke_items.pop(index))
+                self.drawings.pop(index)
+                self.drawingsChanged.emit()
+        else:
+            point = self._map_point(event.pos())
+            if point is not None and len(self.drawings) < 250:
+                self._current_points = [[point.x(), point.y()]]
+                self._current_item = self._draw_item(self._current_points)
+        event.accept()
+
+    def mouseMoveEvent(self, event):
+        if self._current_item is None:
+            super().mouseMoveEvent(event)
+            return
+        point = self._map_point(event.pos())
+        if point is not None and len(self._current_points) < 1200:
+            previous = self._current_points[-1]
+            if abs(point.x() - previous[0]) + abs(point.y() - previous[1]) >= 1:
+                self._current_points.append([point.x(), point.y()])
+                path = self._current_item.path()
+                path.lineTo(point)
+                self._current_item.setPath(path)
+        event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if self._current_item is not None and event.button() == Qt.MouseButton.LeftButton:
+            self.drawings.append(self._current_points)
+            self.stroke_items.append(self._current_item)
+            self._current_points = None
+            self._current_item = None
+            self.drawingsChanged.emit()
+            event.accept()
+            return
+        super().mouseReleaseEvent(event)
+        if self.draw_mode == "move" and event.button() == Qt.MouseButton.LeftButton:
+            self.viewChanged.emit()
+
     def zoom(self, factor: float, under_mouse=False):
         new_level = max(1.0, min(8.0, self.zoom_level * factor))
         if new_level == self.zoom_level:
@@ -168,12 +283,14 @@ class MapView(QGraphicsView):
             self.scale(new_level / self.zoom_level, new_level / self.zoom_level)
             self.setTransformationAnchor(QGraphicsView.ViewportAnchor.AnchorViewCenter)
             self.zoom_level = new_level
+            self.viewChanged.emit()
 
     def reset_zoom(self):
         self.resetTransform()
         self.fitInView(self.map_scene.sceneRect(), Qt.AspectRatioMode.KeepAspectRatio)
         self.centerOn(self.map_scene.sceneRect().center())
         self.zoom_level = 1.0
+        self.viewChanged.emit()
 
     def _label(self, label, x, y, offset, color="#334155", size=9):
         item = self.map_scene.addText(label, QFont("Segoe UI", size))
@@ -182,10 +299,14 @@ class MapView(QGraphicsView):
         item.setTransform(QTransform.fromTranslate(*offset))
         item.setPos(x, y)
 
-    def set_customers(self, customers: list[dict]):
+    def set_customers(self, customers: list[dict], color_for=None):
         """Zeigt Kunden mit einer lokalen, ungefähren PLZ-Referenzposition."""
+        strokes = self.drawings
         self.map_scene.clear()
         self.markers = {}
+        self.stroke_items = []
+        self._current_item = None
+        self._current_points = None
         self.map_scene.setSceneRect(0, 0, self.WIDTH, self.HEIGHT)
         valid = [c for c in customers if c["lat"] is not None and c["lon"] is not None and not c["issue"]]
 
@@ -230,26 +351,20 @@ class MapView(QGraphicsView):
                        "Dresden": (10, 2), "Frankfurt": (-78, 0)}
             self._label(city, x, y, offsets.get(city, (8, -24)), "#405d50")
 
-        #rodgau
-        x,y =xy(8.8844,50.0255)
-        dot = self.map_scene.addEllipse(
-                -2.5, -2.5, 5, 5, QPen(QColor("#923030")), QBrush(QColor("#923030")))
-        dot.setPos(x, y)
-        dot.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIgnoresTransformations)
-        dot.setZValue(-1)
-        self._label("Rodgau", x, y, (8, -24), "#923030")
-
         positions = defaultdict(list)
         for customer in valid:
             positions[(customer["lat"], customer["lon"])].append(customer)
         for (lat, lon), customers_here in positions.items():
             x, y = xy(lon, lat)
             marker = CustomerMarker(x, y, customers_here, self.on_customer_click)
-            marker.setBrush(QBrush(QColor("#2563eb")))
+            colors = {color_for(c) for c in customers_here} if color_for else {"#2563eb"}
+            marker.base_color = colors.pop() if len(colors) == 1 else "#64748b"
+            marker.setBrush(QBrush(QColor(marker.base_color)))
             marker.setPen(QPen(QColor("white"), 2))
             self.map_scene.addItem(marker)
             for customer in customers_here:
                 self.markers[customer["row"]] = marker
+        self.set_drawings(strokes)
 
     def highlight(self, csv_row: int, focus: bool = False):
         """Markiert den Kunden sichtbar und führt die Karte bei Bedarf dorthin."""
@@ -257,7 +372,7 @@ class MapView(QGraphicsView):
         for marker in set(self.markers.values()):
             selected = marker is target
             marker.setPen(QPen(QColor("#111827" if selected else "white"), 3 if selected else 2))
-            marker.setBrush(QBrush(QColor("#f97316" if selected else "#2563eb")))
+            marker.setBrush(QBrush(QColor(marker.base_color)))
             marker.setScale(1.35 if selected else 1.0)
             marker.setZValue(5 if selected else 3)
         if focus and target is not None:

@@ -1,0 +1,15 @@
+PyKundenkarte – Kurzanleitung
+============================
+
+1. PyKundenkarte.exe doppelklicken. Python und Administratorrechte sind
+   nicht erforderlich.
+2. „CSV öffnen …“ anklicken und die eigene Kunden-CSV auswählen.
+   Kundenname, Straße, PLZ und Ort zuordnen; E-Mail und Telefon sind optional.
+3. Mit „Suche“ und „PLZ beginnt mit“ filtern. Beispiele: 64, 01 -- 09 (filtert nach Kunden von Ortschaft 01... bis 09...)
+   oder 60 -- 69 && 01. && bedeutet ODER. Karte und Liste folgen dem Filter.
+4. Marker anklicken, um Kundendetails zu sehen. „+ Kunde hinzufügen“
+   speichert neue Einträge in der geöffneten CSV (Schreibrecht nötig).
+
+Die Karte zeigt ungefähre PLZ-Positionen, keine genauen Kundenadressen.
+Alle Kundendaten bleiben lokal; die App benötigt kein Internet.
+Falls keine Positionen erscheinen: data\DE.txt im EXE-Ordner prüfen.
